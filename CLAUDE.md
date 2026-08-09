@@ -16,10 +16,41 @@ practicar, de forma integrada, los servicios que quiero ofrecer como freelance
   no "construir desde cero" — quiero que el proyecto refleje eso cuando tenga sentido.
 
 ## Estado actual
-- `elrastro.html`: prototipo de la tienda (HTML/CSS/JS vanilla), con conexión a
-  Google Sheets publicado como CSV para cargar productos dinámicamente.
-- Pendiente: chatbot con RAG sobre el catálogo, automatización de confirmaciones,
-  integración con Sheets más robusta, dashboard de pedidos.
+
+Monorepo npm (workspaces) con dos paquetes:
+
+- `client/`: tienda **Vite + React + TypeScript** (hero, filtros por categoría,
+  búsqueda, grid de productos con la estética "de rastro"). Lee el catálogo de
+  la API del backend (`src/data/apiClient.ts`). Si la API no está disponible,
+  usa productos de ejemplo (`src/data/demoProducts.ts`).
+- `server/`: **Node + Express + TypeScript + SQLite** (`node:sqlite`, módulo
+  nativo de Node 24, sin dependencias de compilación). Mantiene el catálogo en
+  `server/data/elrastro.db` y expone:
+  - `GET /api/products` (público) y `GET /api/products/:id`.
+  - Endpoints admin protegidos por `ADMIN_TOKEN` (Bearer): CRUD de productos y
+    `POST /api/sync`.
+  - Sincronización desde Google Sheets publicado como CSV: `npm run sync`
+    (CLI) o `POST /api/sync`; hace upsert por **SKU** (idempotente) y desactiva
+    los SKU que ya no están en la hoja.
+  - En el arranque, si la BD está vacía, hace un seed desde la hoja.
+- `docs/sample-products.csv`: hoja de ejemplo (7 columnas: `sku, nombre,
+  categoria, precio, estado, descripcion, stock`; los campos con comas van
+  entrecomillados).
+- `archive/elrastro.html`: primer prototipo vanilla, conservado como referencia.
+
+Configuración: copiar `.env.example` → `.env` en `client/` (variable
+`VITE_API_URL`) y en `server/` (`PORT`, `CLIENT_ORIGIN`, `ADMIN_TOKEN`,
+`SHEET_CSV_URL`). Arranque con `npm run dev` (levanta server en :3000 y client
+en :5173).
+
+Flujo pensado para el cliente real: edita su inventario en Google Sheets →
+la API se sincroniza (cron/CLI/endpoint) → la tienda lee de la API. El cliente
+nunca usa formularios CRUD.
+
+### Pendiente
+- Chatbot con RAG sobre el catálogo (consumiendo la API real).
+- Dashboard de pedidos (la tabla de pedidos aún no existe).
+- Automatización de confirmaciones y sync periódico (cron).
 
 ## Cómo trabajar conmigo en este proyecto
 - Explicar los conceptos nuevos a medida que aparecen (no dar por hecho que los conozco).
