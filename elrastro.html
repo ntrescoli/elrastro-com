@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>elrastro.com</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Special+Elite&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  :root{
+    --ink:#241f1a;
+    --ink-soft:#4a4238;
+    --paper:#eee1c2;
+    --paper-light:#faf3e2;
+    --stamp:#a4342a;
+    --moss:#52684f;
+    --brass:#bd8c2c;
+    --string:#9c8563;
+    --line:#d8c9a3;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(36,31,26,0.03) 0, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(36,31,26,0.03) 0, transparent 40%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  a{color:inherit}
+
+  /* HERO */
+  .hero{
+    background:var(--ink);
+    color:var(--paper-light);
+    padding:64px 24px 110px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'Special Elite',monospace;
+    letter-spacing:4px;
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--brass);
+    margin-bottom:14px;
+  }
+  .hero h1{
+    font-family:'Anton',sans-serif;
+    font-size:clamp(3rem,11vw,6.5rem);
+    line-height:0.9;
+    letter-spacing:1px;
+    margin:0;
+  }
+  .hero h1 .dot{color:var(--stamp)}
+  .hero p{
+    font-family:'Special Elite',monospace;
+    max-width:480px;
+    margin:20px auto 0;
+    color:var(--paper);
+    font-size:15px;
+    line-height:1.6;
+  }
+  .stamp{
+    position:absolute;
+    top:36px;
+    right:6%;
+    width:112px;
+    height:112px;
+    border:2px dashed var(--stamp);
+    border-radius:50%;
+    color:var(--stamp);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    transform:rotate(-14deg);
+    font-family:'Special Elite',monospace;
+    font-size:10.5px;
+    letter-spacing:1.5px;
+    padding:10px;
+    line-height:1.4;
+    opacity:0.85;
+  }
+  @media (max-width:640px){ .stamp{display:none} }
+
+  /* CONNECT PANEL */
+  .connect-wrap{ padding:0 24px; }
+  .connect{
+    background:var(--paper-light);
+    border:2px solid var(--ink);
+    box-shadow:6px 6px 0 var(--ink);
+    max-width:680px;
+    margin:-56px auto 48px;
+    padding:24px 26px;
+    position:relative;
+    z-index:2;
+  }
+  .connect h2{
+    font-family:'Anton',sans-serif;
+    font-size:20px;
+    letter-spacing:0.5px;
+    margin:0 0 6px;
+  }
+  .connect p{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin:0 0 16px;
+    line-height:1.5;
+  }
+  .connect-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .connect input[type=url]{
+    flex:1;
+    min-width:220px;
+    padding:11px 12px;
+    border:1.5px solid var(--ink);
+    background:#fff;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+  }
+  .connect button{
+    font-family:'Special Elite',monospace;
+    background:var(--moss);
+    color:#fff;
+    border:1.5px solid var(--ink);
+    padding:11px 18px;
+    cursor:pointer;
+    font-size:13px;
+    letter-spacing:0.5px;
+  }
+  .connect button.secondary{
+    background:transparent;
+    color:var(--ink);
+  }
+  .connect button:hover{ filter:brightness(1.08); }
+  .status{
+    margin-top:12px;
+    font-size:13px;
+    font-family:'Special Elite',monospace;
+  }
+  .status.ok{ color:var(--moss); }
+  .status.err{ color:var(--stamp); }
+  .connect details{ margin-top:14px; font-size:13px; color:var(--ink-soft); }
+  .connect summary{ cursor:pointer; font-weight:600; color:var(--ink); }
+  .connect ul{ margin:8px 0 0; padding-left:18px; line-height:1.7; }
+  .connect code{ background:var(--paper); padding:1px 5px; border-radius:2px; }
+
+  /* FILTER BAR */
+  .filters{
+    max-width:1080px;
+    margin:0 auto;
+    padding:0 24px 8px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .chip{
+    font-family:'Special Elite',monospace;
+    font-size:12.5px;
+    padding:7px 14px;
+    border:1.5px solid var(--ink);
+    background:transparent;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .chip.active{
+    background:var(--ink);
+    color:var(--paper-light);
+  }
+  .search{
+    margin-left:auto;
+    padding:8px 12px;
+    border:1.5px solid var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    min-width:180px;
+  }
+
+  /* GRID */
+  .grid{
+    max-width:1080px;
+    margin:0 auto;
+    padding:28px 24px 80px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:34px 26px;
+  }
+  .empty{
+    text-align:center;
+    font-family:'Special Elite',monospace;
+    color:var(--ink-soft);
+    padding:40px 20px;
+    grid-column:1/-1;
+  }
+  .card{
+    background:var(--paper-light);
+    border:1px solid var(--line);
+    box-shadow:3px 3px 0 rgba(36,31,26,0.14);
+    padding:26px 16px 18px;
+    position:relative;
+  }
+  .hole{
+    position:absolute;
+    top:-9px;
+    left:50%;
+    transform:translateX(-50%);
+    width:16px;
+    height:16px;
+    background:var(--paper-light);
+    border:2px solid var(--ink);
+    border-radius:50%;
+  }
+  .hole::before{
+    content:"";
+    position:absolute;
+    top:-13px;
+    left:2px;
+    width:8px;
+    height:14px;
+    border:2px solid var(--string);
+    border-bottom:none;
+    border-radius:8px 8px 0 0;
+  }
+  .card-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .emoji{ font-size:30px; line-height:1; }
+  .estado{
+    font-family:'Special Elite',monospace;
+    font-size:10px;
+    letter-spacing:0.5px;
+    padding:3px 8px;
+    border-radius:2px;
+    color:#fff;
+    white-space:nowrap;
+    text-transform:uppercase;
+  }
+  .card-name{
+    font-weight:600;
+    font-size:15px;
+    margin:14px 0 4px;
+    line-height:1.3;
+  }
+  .card-desc{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    min-height:36px;
+  }
+  .card-bottom{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px dashed var(--line);
+  }
+  .price{
+    font-family:'Special Elite',monospace;
+    font-size:19px;
+    color:var(--stamp);
+  }
+  .stock{
+    font-size:11px;
+    color:var(--ink-soft);
+    font-family:'Inter',sans-serif;
+  }
+  footer{
+    text-align:center;
+    padding:30px 20px 50px;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-family:'Special Elite',monospace;
+  }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="eyebrow">Mercadillo online · piezas con historia</div>
+    <h1>EL RASTRO<span class="dot">.com</span></h1>
+    <p>Cada domingo, un mercadillo nuevo. Cada objeto, una historia distinta. Segunda mano, primera calidad.</p>
+    <div class="stamp">AUTÉNTICO<br>DE RASTRO</div>
+  </div>
+
+  <div class="connect-wrap">
+    <div class="connect">
+      <h2>Conecta tu inventario</h2>
+      <p>Pega aquí el enlace CSV de tu Google Sheets publicado y la tienda se actualizará con tus productos reales.</p>
+      <div class="connect-row">
+        <input id="sheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv">
+        <button id="connectBtn">Conectar Google Sheets</button>
+        <button id="resetBtn" class="secondary">Usar ejemplo</button>
+      </div>
+      <div id="status" class="status"></div>
+      <details>
+        <summary>¿Cómo publico mi hoja y qué columnas necesito?</summary>
+        <ul>
+          <li>En Google Sheets: <code>Archivo → Compartir → Publicar en la web</code> → elige la hoja → formato <code>CSV</code> → Publicar.</li>
+          <li>Copia el enlace que te da Google y pégalo arriba.</li>
+          <li>Columnas esperadas (primera fila = encabezados): <code>nombre</code>, <code>categoria</code>, <code>precio</code>, <code>estado</code>, <code>descripcion</code>, <code>stock</code>.</li>
+          <li><code>estado</code> admite: <code>como nuevo</code>, <code>bueno</code> o <code>regular</code>.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+
+  <footer>elrastro.com — proyecto de práctica · web + Google Sheets</footer>
+
+<script>
+const DEMO_PRODUCTS = [
+  {nombre:"Tocadiscos Dual 1219", categoria:"Música", precio:85, estado:"bueno", descripcion:"Tocadiscos vintage de los 70, funciona perfectamente.", stock:1},
+  {nombre:"Cazadora de cuero marrón", categoria:"Ropa", precio:38, estado:"como nuevo", descripcion:"Talla M, piel auténtica, poco uso.", stock:1},
+  {nombre:"Máquina de escribir Olivetti", categoria:"Decoración", precio:60, estado:"regular", descripcion:"Funciona, le falta una tecla. Preciosa como pieza decorativa.", stock:1},
+  {nombre:"Cámara Zenit 35mm", categoria:"Electrónica", precio:45, estado:"bueno", descripcion:"Cámara analógica soviética, incluye funda de cuero.", stock:2},
+  {nombre:"Silla de anticuario", categoria:"Muebles", precio:25, estado:"regular", descripcion:"Silla de madera maciza, algo de desgaste en el barniz.", stock:3},
+  {nombre:"Jarrón de cerámica pintado a mano", categoria:"Decoración", precio:18, estado:"como nuevo", descripcion:"Motivos florales, altura 30cm.", stock:1},
+  {nombre:"Colección discos de vinilo (x12)", categoria:"Música", precio:40, estado:"bueno", descripcion:"Rock y jazz de los 60-70, buen estado general.", stock:1},
+  {nombre:"Reloj de pulsera mecánico", categoria:"Otros", precio:55, estado:"bueno", descripcion:"Cuerda manual, correa de piel nueva.", stock:1},
+];
+
+const CATEGORY_EMOJI = {
+  "Música":"🎵", "Ropa":"👕", "Electrónica":"📻", "Muebles":"🪑",
+  "Decoración":"🏺", "Libros":"📚", "Otros":"🔍"
+};
+
+const ESTADO_COLOR = {
+  "como nuevo":"var(--moss)", "bueno":"var(--brass)", "regular":"var(--stamp)"
+};
+
+let products = DEMO_PRODUCTS.slice();
+let activeCategory = "Todos";
+let searchTerm = "";
+const rotations = [-1.4, 0.8, -0.5, 1.2, -0.9, 0.5, -1.1, 1.5];
+
+function normalize(rows){
+  return rows.map(r => ({
+    nombre: r.nombre || r.Nombre || "Producto sin nombre",
+    categoria: r.categoria || r.Categoria || "Otros",
+    precio: parseFloat(r.precio || r.Precio || 0) || 0,
+    estado: (r.estado || r.Estado || "bueno").toLowerCase().trim(),
+    descripcion: r.descripcion || r.Descripcion || "",
+    stock: parseInt(r.stock || r.Stock || 1) || 0
+  })).filter(p => p.nombre !== "Producto sin nombre" || p.precio > 0);
+}
+
+function renderFilters(){
+  const cats = ["Todos", ...new Set(products.map(p => p.categoria))];
+  const el = document.getElementById('filters');
+  el.innerHTML = cats.map(c =>
+    `<button class="chip ${c===activeCategory?'active':''}" data-cat="${c}">${c}</button>`
+  ).join('') + `<input class="search" id="searchInput" placeholder="Buscar…" value="${searchTerm}">`;
+
+  el.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ activeCategory = btn.dataset.cat; renderFilters(); renderGrid(); });
+  });
+  document.getElementById('searchInput').addEventListener('input', e=>{
+    searchTerm = e.target.value.toLowerCase();
+    renderGrid();
+  });
+}
+
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  let list = products.filter(p =>
+    (activeCategory==="Todos" || p.categoria===activeCategory) &&
+    (p.nombre.toLowerCase().includes(searchTerm) || p.descripcion.toLowerCase().includes(searchTerm))
+  );
+
+  if(list.length===0){
+    grid.innerHTML = '<div class="empty">No hay productos que coincidan. Prueba otra categoría o búsqueda.</div>';
+    return;
+  }
+
+  grid.innerHTML = list.map((p,i)=>{
+    const emoji = CATEGORY_EMOJI[p.categoria] || "🔍";
+    const color = ESTADO_COLOR[p.estado] || "var(--brass)";
+    const rot = rotations[i % rotations.length];
+    return `
+    <div class="card" style="transform:rotate(${rot}deg)">
+      <div class="hole"></div>
+      <div class="card-top">
+        <span class="emoji">${emoji}</span>
+        <span class="estado" style="background:${color}">${p.estado}</span>
+      </div>
+      <div class="card-name">${p.nombre}</div>
+      <div class="card-desc">${p.descripcion}</div>
+      <div class="card-bottom">
+        <span class="price">${p.precio.toFixed(2)}€</span>
+        <span class="stock">${p.stock>0 ? p.stock+' disp.' : 'agotado'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setStatus(msg, type){
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + (type||'');
+}
+
+document.getElementById('connectBtn').addEventListener('click', ()=>{
+  const url = document.getElementById('sheetUrl').value.trim();
+  if(!url){ setStatus('Pega primero el enlace CSV de tu Google Sheets.', 'err'); return; }
+  setStatus('Cargando…', '');
+  Papa.parse(url, {
+    download:true,
+    header:true,
+    skipEmptyLines:true,
+    complete: function(results){
+      const parsed = normalize(results.data);
+      if(parsed.length===0){
+        setStatus('Se conectó, pero no se encontraron filas válidas. Revisa los nombres de columnas.', 'err');
+        return;
+      }
+      products = parsed;
+      activeCategory = "Todos";
+      searchTerm = "";
+      renderFilters();
+      renderGrid();
+      setStatus(`✓ ${parsed.length} productos cargados desde tu Google Sheets.`, 'ok');
+    },
+    error: function(err){
+      setStatus('No se pudo cargar. Comprueba que la hoja esté "Publicada en la web" como CSV.', 'err');
+    }
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  products = DEMO_PRODUCTS.slice();
+  activeCategory = "Todos";
+  searchTerm = "";
+  document.getElementById('sheetUrl').value = "";
+  setStatus('Mostrando datos de ejemplo.', 'ok');
+  renderFilters();
+  renderGrid();
+});
+
+renderFilters();
+renderGrid();
+</script>
+</body>
+</html>
