@@ -3,6 +3,7 @@ import cors from "cors";
 import { db } from "./db.js";
 import { productsRouter } from "./routes/products.js";
 import { adminRouter } from "./routes/admin.js";
+import { chatRouter } from "./routes/chat.js";
 import { syncProducts, resolveDefaultSource } from "./services/sync.js";
 
 const app = express();
@@ -14,6 +15,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/products", productsRouter);
+app.use("/api/chat", chatRouter);
 app.use("/api", adminRouter);
 
 async function seedIfEmpty() {

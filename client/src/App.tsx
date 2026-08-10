@@ -6,6 +6,7 @@ import Hero from "./components/Hero";
 import CatalogStatus from "./components/CatalogStatus";
 import FilterBar from "./components/FilterBar";
 import ProductGrid from "./components/ProductGrid";
+import ChatWidget from "./components/ChatWidget";
 
 interface Status {
   message: string;
@@ -78,6 +79,7 @@ export default function App() {
       <footer>
         elrastro.com — proyecto de práctica · React + TypeScript + Express + SQLite + Google Sheets
       </footer>
+      <ChatWidget apiUrl={API_URL} />
     </>
   );
 }

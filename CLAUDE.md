@@ -32,7 +32,14 @@ Monorepo npm (workspaces) con dos paquetes:
   - Sincronización desde Google Sheets publicado como CSV: `npm run sync`
     (CLI) o `POST /api/sync`; hace upsert por **SKU** (idempotente) y desactiva
     los SKU que ya no están en la hoja.
+  - Chatbot RAG sobre el catálogo: `POST /api/chat` recupera los productos
+    relevantes (scoring por nombre/categoría/descripción en
+    `services/retrieval.ts`) y responde con plantilla (`services/chat.ts`).
+    La generación está lista para enchufar un LLM después sin tocar la
+    recuperación.
   - En el arranque, si la BD está vacía, hace un seed desde la hoja.
+- `client/`: incluye un widget de chat flotante (`ChatWidget.tsx`) que usa el
+  endpoint `/api/chat`.
 - `docs/sample-products.csv`: hoja de ejemplo (7 columnas: `sku, nombre,
   categoria, precio, estado, descripcion, stock`; los campos con comas van
   entrecomillados).
@@ -48,9 +55,9 @@ la API se sincroniza (cron/CLI/endpoint) → la tienda lee de la API. El cliente
 nunca usa formularios CRUD.
 
 ### Pendiente
-- Chatbot con RAG sobre el catálogo (consumiendo la API real).
 - Dashboard de pedidos (la tabla de pedidos aún no existe).
 - Automatización de confirmaciones y sync periódico (cron).
+- Enchufar un LLM real al generador del chatbot.
 
 ## Cómo trabajar conmigo en este proyecto
 - Explicar los conceptos nuevos a medida que aparecen (no dar por hecho que los conozco).
