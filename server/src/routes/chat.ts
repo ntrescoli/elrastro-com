@@ -3,7 +3,7 @@ import { answerChat } from "../services/chat.js";
 
 export const chatRouter = Router();
 
-chatRouter.post("/", (req, res) => {
+chatRouter.post("/", async (req, res) => {
   const body = req.body as Record<string, unknown> | undefined;
   const message = typeof body?.message === "string" ? body.message.trim() : "";
 
@@ -12,5 +12,5 @@ chatRouter.post("/", (req, res) => {
     return;
   }
 
-  res.json(answerChat(message));
+  res.json(await answerChat(message));
 });

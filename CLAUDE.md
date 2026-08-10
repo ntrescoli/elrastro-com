@@ -34,9 +34,10 @@ Monorepo npm (workspaces) con dos paquetes:
     los SKU que ya no están en la hoja.
   - Chatbot RAG sobre el catálogo: `POST /api/chat` recupera los productos
     relevantes (scoring por nombre/categoría/descripción en
-    `services/retrieval.ts`) y responde con plantilla (`services/chat.ts`).
-    La generación está lista para enchufar un LLM después sin tocar la
-    recuperación.
+    `services/retrieval.ts`). La respuesta la genera un LLM opcional
+    (`services/llm.ts`, cualquier API compatible con OpenAI: Ollama, Groq,
+    Gemini…; config con `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY`) y si no
+    está configurado usa una plantilla (`services/chat.ts`).
   - En el arranque, si la BD está vacía, hace un seed desde la hoja.
 - `client/`: incluye un widget de chat flotante (`ChatWidget.tsx`) que usa el
   endpoint `/api/chat`.
@@ -47,8 +48,8 @@ Monorepo npm (workspaces) con dos paquetes:
 
 Configuración: copiar `.env.example` → `.env` en `client/` (variable
 `VITE_API_URL`) y en `server/` (`PORT`, `CLIENT_ORIGIN`, `ADMIN_TOKEN`,
-`SHEET_CSV_URL`). Arranque con `npm run dev` (levanta server en :3000 y client
-en :5173).
+`SHEET_CSV_URL`, `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY`). Arranque con
+`npm run dev` (levanta server en :3000 y client en :5173).
 
 Flujo pensado para el cliente real: edita su inventario en Google Sheets →
 la API se sincroniza (cron/CLI/endpoint) → la tienda lee de la API. El cliente
@@ -57,7 +58,7 @@ nunca usa formularios CRUD.
 ### Pendiente
 - Dashboard de pedidos (la tabla de pedidos aún no existe).
 - Automatización de confirmaciones y sync periódico (cron).
-- Enchufar un LLM real al generador del chatbot.
+- Probar el chatbot con un LLM real (Ollama, Groq o Gemini; ver `.env.example`).
 
 ## Cómo trabajar conmigo en este proyecto
 - Explicar los conceptos nuevos a medida que aparecen (no dar por hecho que los conozco).

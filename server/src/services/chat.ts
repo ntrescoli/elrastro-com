@@ -1,11 +1,19 @@
 import { db } from "../db.js";
 import type { ProductRow } from "../types.js";
 import { normalize, retrieve } from "./retrieval.js";
+import { generateWithLLM, isLLMConfigured } from "./llm.js";
 
 export interface ChatResult {
   answer: string;
   products: ProductRow[];
 }
+
+const SYSTEM_PROMPT = `Eres el bot de "elrastro.com", una tienda online de segunda mano con estética de mercadillo.
+Responde SIEMPRE en español, con tono cercano y natural.
+Utiliza SOLO los productos que te pasan como contexto: no inventes precios, estados ni descripciones.
+Menciona el nombre, el precio y el estado de cada producto que recomiendes.
+Si el contexto no responde a la pregunta, dilo con honestidad y sugiere categorías del rastro.
+Sé breve: 5-6 líneas como máximo.`;
 
 const SELECT_ACTIVE = `
   SELECT id, sku, nombre, categoria, precio, estado, descripcion, stock
@@ -23,7 +31,7 @@ function formatHits(hits: ProductRow[]): string {
     .join("\n");
 }
 
-export function answerChat(message: string): ChatResult {
+export async function answerChat(message: string): Promise<ChatResult> {
   const products = loadProducts();
   const normalized = normalize(message);
 
@@ -64,6 +72,16 @@ export function answerChat(message: string): ChatResult {
       answer: `No encontré nada parecido a "${message}". Prueba con categorías como música, muebles, electrónica, ropa o decoración.`,
       products: [],
     };
+  }
+
+  if (isLLMConfigured()) {
+    const context = JSON.stringify(hits, null, 2);
+    try {
+      const answer = await generateWithLLM(SYSTEM_PROMPT, `Productos del catálogo:\n${context}\n\nPregunta del cliente: "${message}"`);
+      return { answer, products: hits };
+    } catch (err) {
+      console.error("El LLM falló, usando plantilla:", (err as Error).message);
+    }
   }
 
   return {
